@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>金顺税务门店保本保利计算器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .input-group {
+            transition: all 0.3s ease;
+        }
+        .input-group:focus-within {
+            transform: translateX(5px);
+        }
+        .result-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            animation: pulse-glow 2s infinite;
+        }
+        .result-card-profit {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            animation: pulse-glow-blue 2s infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 10px 30px rgba(245, 87, 108, 0.3); }
+            50% { box-shadow: 0 10px 40px rgba(245, 87, 108, 0.5); }
+        }
+        @keyframes pulse-glow-blue {
+            0%, 100% { box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3); }
+            50% { box-shadow: 0 10px 40px rgba(79, 172, 254, 0.5); }
+        }
+        .cost-item {
+            transition: all 0.3s ease;
+        }
+        .cost-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .highlight-input {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border: 2px solid #667eea;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- 标题 -->
+        <div class="text-center mb-8 text-white">
+            <h1 class="text-4xl font-bold mb-2">🏪 金顺税务门店保本保利计算器</h1>
+            <p class="text-lg opacity-90">精准计算保本点与保利点，助力经营决策</p>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-6">
+            <!-- 左侧：输入区域 -->
+            <div class="glass-panel rounded-2xl p-6 shadow-2xl">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <span class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">1</span>
+                    成本参数设置
+                </h2>
+
+                <!-- 固定成本 -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">固定成本（每月）</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-gray-600 mb-1">房租/物业</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2 text-gray-500">¥</span>
+                                <input type="number" id="rent" class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0" oninput="calculate()">
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-gray-600 mb-1">固定人工成本（底薪）</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2 text-gray-500">¥</span>
+                                <input type="number" id="fixedLabor" class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0" oninput="calculate()">
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">不含提成的固定薪资支出</p>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-gray-600 mb-1">水电费</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2 text-gray-500">¥</span>
+                                <input type="number" id="utilities" class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0" oninput="calculate()">
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-gray-600 mb-1">设备折旧/维护/装修费摊销</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2 text-gray-500">¥</span>
+                                <input type="number" id="maintenance" class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0" oninput="calculate()">
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-gray-600 mb-1">其他固定费用</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2 text-gray-500">¥</span>
+                                <input type="number" id="otherFixed" class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0" oninput="calculate()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 变动成本 -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3 border-b pb-2">变动成本（占收入比例）</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-gray-600 mb-1">商品成本率</label>
+                            <div class="relative">
+                                <input type="number" id="cogsRate" class="w-full pl-4 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0" step="0.1" oninput="calculate()">
+                                <span class="absolute right-3 top-2 text-gray-500">%</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">进货成本占销售收入的比例</p>
+                        </div>
+
+                        <div class="input-group bg-orange-50 p-3 rounded-lg border border-orange-200">
+                            <label class="block text-sm font-medium text-orange-700 mb-1">变动人工成本（提成/奖金率）</label>
+                            <div class="relative">
+                                <input type="number" id="variableLaborRate" class="w-full pl-4 pr-8 py-2 border border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white" placeholder="0" step="0.1" oninput="calculate()">
+                                <span class="absolute right-3 top-2 text-gray-500">%</span>
+                            </div>
+                            <p class="text-xs text-orange-600 mt-1">销售提成、绩效奖金等随收入变动的部分</p>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-gray-600 mb-1">平台扣点/手续费率</label>
+                            <div class="relative">
+                                <input type="number" id="platformRate" class="w-full pl-4 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0" step="0.1" oninput="calculate()">
+                                <span class="absolute right-3 top-2 text-gray-500">%</span>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="block text-sm font-medium text-gray-600 mb-1">其他变动费用率（管理费/税费等）</label>
+                            <div class="relative">
+                                <input type="number" id="otherVariableRate" class="w-full pl-4 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0" step="0.1" oninput="calculate()">
+                                <span class="absolute right-3 top-2 text-gray-500">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 保利点设置 -->
+                <div class="mb-6 bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-xl border-2 border-indigo-200">
+                    <h3 class="text-lg font-semibold text-indigo-800 mb-3 flex items-center">
+                        <span class="bg-indigo-500 text-white rounded-full w-6 h-6 flex items-center justify-center mr-2 text-xs">★</span>
+                        保利点设置（目标利润）
+                    </h3>
+                    
+                    <div class="input-group highlight-input rounded-lg">
+                        <label class="block text-sm font-bold text-indigo-700 mb-1">目标利润（每月）</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2 text-indigo-600 font-bold">¥</span>
+                            <input type="number" id="targetProfit" class="w-full pl-8 pr-4 py-3 border-2 border-indigo-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-lg font-bold text-indigo-800" placeholder="输入目标利润，如：10000" oninput="calculate()">
+                        </div>
+                        <p class="text-xs text-indigo-600 mt-1">输入您希望实现的月度净利润目标</p>
+                    </div>
+                </div>
+
+                <button onclick="resetForm()" class="w-full py-2 border-2 border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                    重置数据
+                </button>
+            </div>
+
+            <!-- 右侧：结果展示 -->
+            <div class="space-y-6">
+                <!-- 双结果卡片 -->
+                <div class="grid gap-4">
+                    <!-- 保本点卡片 -->
+                    <div class="result-card rounded-2xl p-6 text-white shadow-2xl">
+                        <div class="flex justify-between items-start mb-2">
+                            <h2 class="text-lg font-semibold opacity-90">月度保本点</h2>
+                            <span class="bg-white/20 px-3 py-1 rounded-full text-xs">零利润</span>
+                        </div>
+                        <div class="text-4xl font-bold mb-1" id="breakEvenPoint">¥0</div>
+                        <p class="opacity-80 text-sm mb-4">覆盖所有成本的最低营业额</p>
+                        
+                        <div class="grid grid-cols-2 gap-3 pt-3 border-t border-white/30 text-sm">
+                            <div>
+                                <div class="opacity-80 text-xs">日均销售</div>
+                                <div class="text-lg font-bold" id="breakEvenDaily">¥0</div>
+                            </div>
+                            <div>
+                                <div class="opacity-80 text-xs">固定成本</div>
+                                <div class="text-lg font-bold" id="breakEvenFixed">¥0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 保利点卡片 -->
+                    <div class="result-card-profit rounded-2xl p-6 text-white shadow-2xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-white/20 w-32 h-32 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+                        <div class="flex justify-between items-start mb-2 relative z-10">
+                            <h2 class="text-lg font-semibold opacity-90 flex items-center">
+                                <span class="mr-2">🎯</span> 月度保利点
+                            </h2>
+                            <span class="bg-white/20 px-3 py-1 rounded-full text-xs">目标利润：<span id="targetProfitDisplay">¥0</span></span>
+                        </div>
+                        <div class="text-4xl font-bold mb-1 relative z-10" id="targetRevenuePoint">¥0</div>
+                        <p class="opacity-80 text-sm mb-4 relative z-10">实现目标利润所需的营业额</p>
+                        
+                        <div class="grid grid-cols-3 gap-2 pt-3 border-t border-white/30 text-sm relative z-10">
+                            <div>
+                                <div class="opacity-80 text-xs">日均销售</div>
+                                <div class="text-base font-bold" id="targetDaily">¥0</div>
+                            </div>
+                            <div>
+                                <div class="opacity-80 text-xs">总成本</div>
+                                <div class="text-base font-bold" id="targetTotalCost">¥0</div>
+                            </div>
+                            <div>
+                                <div class="opacity-80 text-xs">净利润</div>
+                                <div class="text-base font-bold text-yellow-200" id="targetNetProfit">¥0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 差距分析 -->
+                <div class="glass-panel rounded-2xl p-6 shadow-xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                        <span class="mr-2">📊</span> 差距分析
+                    </h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white p-4 rounded-xl shadow-sm">
+                            <div class="text-sm text-gray-600 mb-1">保利点 vs 保本点</div>
+                            <div class="text-2xl font-bold text-indigo-600" id="gapAmount">¥0</div>
+                            <div class="text-xs text-gray-500 mt-1">需多完成 <span id="gapPercent">0%</span> 的营业额</div>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm">
+                            <div class="text-sm text-gray-600 mb-1">安全边际</div>
+                            <div class="text-2xl font-bold text-green-600" id="safetyMargin">0%</div>
+                            <div class="text-xs text-gray-500 mt-1">收入可下降空间</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 成本结构分析 -->
+                <div class="glass-panel rounded-2xl p-6 shadow-xl">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">📈 保利点成本结构</h3>
+                    
+                    <div class="space-y-3" id="costStructure">
+                        <div class="cost-item flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                            <span class="text-gray-700">固定成本</span>
+                            <span class="font-bold text-gray-800" id="profitFixedCost">¥0</span>
+                        </div>
+                        <div class="cost-item flex justify-between items-center p-3 bg-orange-50 rounded-lg">
+                            <span class="text-gray-700">变动成本（含人工提成）</span>
+                            <span class="font-bold text-orange-600" id="profitVariableCost">¥0</span>
+                        </div>
+                        <div class="cost-item flex justify-between items-center p-3 bg-indigo-50 rounded-lg border-2 border-indigo-200">
+                            <span class="text-gray-700 font-medium">目标净利润</span>
+                            <span class="font-bold text-indigo-600" id="profitTargetProfit">¥0</span>
+                        </div>
+                        <div class="h-px bg-gray-200 my-2"></div>
+                        <div class="cost-item flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                            <span class="text-gray-700 font-bold">保利点营业额</span>
+                            <span class="font-bold text-blue-600 text-lg" id="profitRevenueTotal">¥0</span>
+                        </div>
+                    </div>
+
+                    <!-- 可视化进度条 -->
+                    <div class="mt-4 space-y-2">
+                        <div class="flex justify-between text-xs text-gray-600 mb-1">
+                            <span>成本利润占比</span>
+                        </div>
+                        <div class="w-full h-4 bg-gray-200 rounded-full overflow-hidden flex">
+                            <div id="barFixed" class="h-full bg-gray-500 transition-all duration-500" style="width: 0%"></div>
+                            <div id="barVariable" class="h-full bg-orange-400 transition-all duration-500" style="width: 0%"></div>
+                            <div id="barProfit" class="h-full bg-indigo-500 transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span class="flex items-center"><span class="w-2 h-2 bg-gray-500 rounded-full mr-1"></span>固定</span>
+                            <span class="flex items-center"><span class="w-2 h-2 bg-orange-400 rounded-full mr-1"></span>变动</span>
+                            <span class="flex items-center"><span class="w-2 h-2 bg-indigo-500 rounded-full mr-1"></span>利润</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 情景模拟表 -->
+                <div class="glass-panel rounded-2xl p-6 shadow-xl">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">📉 收入-利润对照表</h3>
+                    <p class="text-sm text-gray-600 mb-3">不同营业额水平下的利润情况</p>
+                    
+                    <div class="overflow-hidden rounded-lg border border-gray-200">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-3 py-2 text-left text-gray-600">营业额</th>
+                                    <th class="px-3 py-2 text-right text-gray-600">总成本</th>
+                                    <th class="px-3 py-2 text-right text-gray-600">净利润</th>
+                                    <th class="px-3 py-2 text-center text-gray-600">状态</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scenarioTable" class="divide-y divide-gray-200">
+                                <!-- 动态生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 计算公式说明 -->
+                <div class="glass-panel rounded-2xl p-6 shadow-xl bg-gradient-to-br from-gray-50 to-gray-100">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">🧮 计算公式</h3>
+                    <div class="text-sm text-gray-600 space-y-3 font-mono bg-white p-4 rounded-lg border border-gray-200">
+                        <div class="bg-red-50 p-2 rounded border-l-4 border-red-400">
+                            <strong class="text-red-700">保本点</strong> = 固定成本 ÷ (1 - 变动成本率)
+                        </div>
+                        <div class="bg-indigo-50 p-2 rounded border-l-4 border-indigo-400">
+                            <strong class="text-indigo-700">保利点</strong> = (固定成本 + 目标利润) ÷ (1 - 变动成本率)
+                        </div>
+                        <div class="text-xs text-gray-500 mt-2 space-y-1">
+                            <p>• 变动成本率 = 商品成本率 + 人工提成率 + 平台扣点率 + 其他变动费率</p>
+                            <p>• 边际贡献率 = 1 - 变动成本率（每元收入中可用于覆盖固定成本和利润的部分）</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function formatMoney(num) {
+            if (!isFinite(num)) return '∞';
+            return '¥' + num.toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        function calculate() {
+            // 获取固定成本
+            const rent = parseFloat(document.getElementById('rent').value) || 0;
+            const fixedLabor = parseFloat(document.getElementById('fixedLabor').value) || 0;
+            const utilities = parseFloat(document.getElementById('utilities').value) || 0;
+            const maintenance = parseFloat(document.getElementById('maintenance').value) || 0;
+            const otherFixed = parseFloat(document.getElementById('otherFixed').value) || 0;
+            
+            const totalFixed = rent + fixedLabor + utilities + maintenance + otherFixed;
+            
+            // 获取变动成本率（转换为小数）
+            const cogsRate = (parseFloat(document.getElementById('cogsRate').value) || 0) / 100;
+            const variableLaborRate = (parseFloat(document.getElementById('variableLaborRate').value) || 0) / 100;
+            const platformRate = (parseFloat(document.getElementById('platformRate').value) || 0) / 100;
+            const otherVariableRate = (parseFloat(document.getElementById('otherVariableRate').value) || 0) / 100;
+            
+            const totalVariableRate = cogsRate + variableLaborRate + platformRate + otherVariableRate;
+            
+            // 获取目标利润
+            const targetProfit = parseFloat(document.getElementById('targetProfit').value) || 0;
+            
+            // 计算边际贡献率
+            let contributionMarginRate = 0;
+            if (totalVariableRate < 1) {
+                contributionMarginRate = 1 - totalVariableRate;
+            }
+            
+            // 计算保本点
+            let breakEven = 0;
+            if (totalVariableRate >= 1) {
+                breakEven = Infinity;
+            } else if (totalVariableRate < 0) {
+                breakEven = 0;
+            } else {
+                breakEven = totalFixed / contributionMarginRate;
+            }
+            
+            // 计算保利点
+            let targetRevenue = 0;
+            if (totalVariableRate >= 1) {
+                targetRevenue = Infinity;
+            } else {
+                targetRevenue = (totalFixed + targetProfit) / contributionMarginRate;
+            }
+            
+            // 更新保本点显示
+            document.getElementById('breakEvenPoint').textContent = formatMoney(breakEven);
+            document.getElementById('breakEvenDaily').textContent = breakEven === Infinity ? '-' : formatMoney(breakEven / 30);
+            document.getElementById('breakEvenFixed').textContent = formatMoney(totalFixed);
+            
+            // 更新保利点显示
+            document.getElementById('targetProfitDisplay').textContent = formatMoney(targetProfit);
+            document.getElementById('targetRevenuePoint').textContent = formatMoney(targetRevenue);
+            document.getElementById('targetDaily').textContent = targetRevenue === Infinity ? '-' : formatMoney(targetRevenue / 30);
+            
+            // 保利点时的成本分析
+            if (targetRevenue > 0 && targetRevenue !== Infinity) {
+                const variableCostAtTarget = targetRevenue * totalVariableRate;
+                const totalCostAtTarget = totalFixed + variableCostAtTarget;
+                const actualProfit = targetRevenue - totalCostAtTarget;
+                
+                document.getElementById('targetTotalCost').textContent = formatMoney(totalCostAtTarget);
+                document.getElementById('targetNetProfit').textContent = formatMoney(actualProfit);
+                
+                // 成本结构明细
+                document.getElementById('profitFixedCost').textContent = formatMoney(totalFixed);
+                document.getElementById('profitVariableCost').textContent = formatMoney(variableCostAtTarget);
+                document.getElementById('profitTargetProfit').textContent = formatMoney(targetProfit);
+                document.getElementById('profitRevenueTotal').textContent = formatMoney(targetRevenue);
+                
+                // 进度条
+                const fixedPercent = (totalFixed / targetRevenue * 100).toFixed(1);
+                const variablePercent = (variableCostAtTarget / targetRevenue * 100).toFixed(1);
+                const profitPercent = (targetProfit / targetRevenue * 100).toFixed(1);
+                
+                document.getElementById('barFixed').style.width = fixedPercent + '%';
+                document.getElementById('barVariable').style.width = variablePercent + '%';
+                document.getElementById('barProfit').style.width = profitPercent + '%';
+                
+                // 差距分析
+                const gap = targetRevenue - breakEven;
+                const gapPercent = breakEven > 0 ? ((gap / breakEven) * 100).toFixed(1) : 0;
+                document.getElementById('gapAmount').textContent = formatMoney(gap);
+                document.getElementById('gapPercent').textContent = gapPercent + '%';
+                
+                // 安全边际（保利点时，收入可下降多少仍能保持目标利润）
+                const safetyMargin = targetProfit > 0 ? ((targetRevenue - breakEven) / targetRevenue * 100).toFixed(1) : 0;
+                document.getElementById('safetyMargin').textContent = safetyMargin + '%';
+            } else {
+                document.getElementById('targetTotalCost').textContent = '-';
+                document.getElementById('targetNetProfit').textContent = '-';
+                document.getElementById('profitFixedCost').textContent = '-';
+                document.getElementById('profitVariableCost').textContent = '-';
+                document.getElementById('profitTargetProfit').textContent = '-';
+                document.getElementById('profitRevenueTotal').textContent = '-';
+                document.getElementById('gapAmount').textContent = '-';
+                document.getElementById('gapPercent').textContent = '-';
+                document.getElementById('safetyMargin').textContent = '-';
+                document.getElementById('barFixed').style.width = '0%';
+                document.getElementById('barVariable').style.width = '0%';
+                document.getElementById('barProfit').style.width = '0%';
+            }
+            
+            // 生成情景模拟表
+            generateScenarios(totalFixed, totalVariableRate, breakEven, targetRevenue, targetProfit);
+        }
+
+        function generateScenarios(fixedCost, variableRate, breakEvenPoint, targetPoint, targetProfit) {
+            const tbody = document.getElementById('scenarioTable');
+            tbody.innerHTML = '';
+            
+            let scenarios = [];
+            
+            if (breakEvenPoint === Infinity || breakEvenPoint === 0) {
+                // 使用固定数值
+                scenarios = [10000, 20000, 30000, 40000, 50000];
+            } else {
+                scenarios = [
+                    breakEvenPoint * 0.5,   // 严重亏损
+                    breakEvenPoint * 0.8,   // 接近保本
+                    breakEvenPoint,         // 保本
+                    targetPoint || breakEvenPoint * 1.3,  // 保利或盈利30%
+                    targetPoint ? targetPoint * 1.2 : breakEvenPoint * 1.5  // 超额完成
+                ];
+            }
+            
+            scenarios.forEach(revenue => {
+                if (revenue <= 0) return;
+                
+                const variableCost = revenue * variableRate;
+                const totalCost = fixedCost + variableCost;
+                const profit = revenue - totalCost;
+                const isProfit = profit > 0;
+                const isBreakEven = Math.abs(profit) < 1;
+                const isTarget = targetProfit > 0 && Math.abs(profit - targetProfit) < 1;
+                
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors' + (isTarget ? ' bg-indigo-50' : '');
+                
+                let statusBadge = '';
+                if (isTarget) {
+                    statusBadge = '<span class="px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-bold">🎯 目标</span>';
+                } else if (isBreakEven) {
+                    statusBadge = '<span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">保本</span>';
+                } else if (isProfit) {
+                    statusBadge = '<span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">盈利</span>';
+                } else {
+                    statusBadge = '<span class="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">亏损</span>';
+                }
+                
+                row.innerHTML = `
+                    <td class="px-3 py-2 font-medium text-gray-800">${formatMoney(revenue)}</td>
+                    <td class="px-3 py-2 text-right text-gray-600">${formatMoney(totalCost)}</td>
+                    <td class="px-3 py-2 text-right font-bold ${isProfit ? 'text-green-600' : isBreakEven ? 'text-gray-600' : 'text-red-600'}">${formatMoney(profit)}</td>
+                    <td class="px-3 py-2 text-center">${statusBadge}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        function resetForm() {
+            const inputs = document.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => input.value = '');
+            calculate();
+        }
+
+        // 初始化
+        calculate();
+    </script>
+</body>
+</html>
