@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人综合所得个税计算器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        .tax-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            animation: pulse-glow 2s infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3); }
+            50% { box-shadow: 0 10px 40px rgba(102, 126, 234, 0.5); }
+        }
+        .input-focus:focus {
+            transform: translateX(5px);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- 标题 -->
+        <div class="text-center mb-8 text-white">
+            <h1 class="text-4xl font-bold mb-2">💰 个人综合所得个税计算器</h1>
+            <p class="text-lg opacity-90">工资薪金、劳务报酬、稿酬、特许权使用费</p>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-6">
+            <!-- 左侧：收入输入 -->
+            <div class="glass-panel rounded-2xl p-6 shadow-2xl">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <span class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 text-sm">1</span>
+                    收入信息录入
+                </h2>
+
+                <!-- 工资薪金 -->
+                <div class="mb-6 bg-blue-50 p-4 rounded-xl border border-blue-200">
+                    <h3 class="text-lg font-semibold text-blue-800 mb-3 flex items-center">
+                        <span class="mr-2">💼</span> 工资薪金所得
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">税前月工资</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2 text-gray-500">¥</span>
+                                <input type="number" id="salary" class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 input-focus" placeholder="0" oninput="calculate()">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">年终奖（可选）</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-2 text-gray-500">¥</span>
+                                <input type="number" id="bonus" class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 input-focus" placeholder="0" oninput="calculate()">
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">单独计税或并入综合所得</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 劳务报酬 -->
+                <div class="mb-6 bg-green-50 p-4 rounded-xl border border-green-200">
+                    <h3 class="text-lg font-semibold text-green-800 mb-3 flex items-center">
+                        <span class="mr-2">🔧</span> 劳务报酬所得
+                    </h3>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">收入金额</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2 text-gray-500">¥</span>
+                            <input type="number" id="labor" class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 input-focus" placeholder="0" oninput="calculate()">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">按次或按月取得的劳务收入</p>
+                    </div>
+                </div>
+
+                <!-- 稿酬所得 -->
+                <div class="mb-6 bg-purple-50 p-4 rounded-xl border border-purple-200">
+                    <h3 class="text-lg font-semibold text-purple-800 mb-3 flex items-center">
+                        <span class="mr-2">✍️</span> 稿酬所得
+                    </h3>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">收入金额</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2 text-gray-500">¥</span>
+                            <input type="number" id="royalty" class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 input-focus" placeholder="0" oninput="calculate()">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">图书、报刊等出版物稿酬</p>
+                    </div>
+                </div>
+
+                <!-- 特许权使用费 -->
+                <div class="mb-6 bg-orange-50 p-4 rounded-xl border border-orange-200">
+                    <h3 class="text-lg font-semibold text-orange-800 mb-3 flex items-center">
+                        <span class="mr-2">💡</span> 特许权使用费所得
+                    </h3>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">收入金额</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2 text-gray-500">¥</span>
+                            <input type="number" id="franchise" class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 input-focus" placeholder="0" oninput="calculate()">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">专利、商标、著作权等收入</p>
+                    </div>
+                </div>
+
+                <!-- 专项扣除 -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">三险一金（每月）</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">养老保险</label>
+                            <input type="number" id="pension" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="0" oninput="calculate()">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">医疗保险</label>
+                            <input type="number" id="medical" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="0" oninput="calculate()">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">失业保险</label>
+                            <input type="number" id="unemployment" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="0" oninput="calculate()">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">住房公积金</label>
+                            <input type="number" id="housing" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm" placeholder="0" oninput="calculate()">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 专项附加扣除 -->
+                <div class="mb-6 bg-indigo-50 p-4 rounded-xl border border-indigo-200">
+                    <h3 class="text-lg font-semibold text-indigo-800 mb-3">专项附加扣除（每月）</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-700">子女教育</span>
+                            <input type="number" id="childEdu" class="w-24 px-2 py-1 border border-gray-300 rounded text-right text-sm" placeholder="0" oninput="calculate()">
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-700">继续教育</span>
+                            <input type="number" id="continuingEdu" class="w-24 px-2 py-1 border border-gray-300 rounded text-right text-sm" placeholder="0" oninput="calculate()">
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-700">住房贷款利息</span>
+                            <input type="number" id="housingLoan" class="w-24 px-2 py-1 border border-gray-300 rounded text-right text-sm" placeholder="0" oninput="calculate()">
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-700">住房租金</span>
+                            <input type="number" id="housingRent" class="w-24 px-2 py-1 border border-gray-300 rounded text-right text-sm" placeholder="0" oninput="calculate()">
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-700">赡养老人</span>
+                            <input type="number" id="elderly" class="w-24 px-2 py-1 border border-gray-300 rounded text-right text-sm" placeholder="0" oninput="calculate()">
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-700">3岁以下婴幼儿照护</span>
+                            <input type="number" id="infant" class="w-24 px-2 py-1 border border-gray-300 rounded text-right text-sm" placeholder="0" oninput="calculate()">
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">* 标准额度：子女教育/婴幼儿照护1000元/孩，赡养老人最高2000元等</p>
+                </div>
+
+                <!-- 其他扣除 -->
+                <div class="mb-4 bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+                    <h3 class="text-lg font-semibold text-yellow-800 mb-3">其他扣除（每月）</h3>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">企业年金、商业健康险等</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2 text-gray-500">¥</span>
+                            <input type="number" id="otherDeduction" class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 input-focus" placeholder="0" oninput="calculate()">
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="resetForm()" class="w-full py-2 border-2 border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                    重置数据
+                </button>
+            </div>
+
+            <!-- 右侧：计算结果 -->
+            <div class="space-y-6">
+                <!-- 总税额卡片 -->
+                <div class="tax-card rounded-2xl p-6 text-white shadow-2xl">
+                    <h2 class="text-lg font-semibold mb-2 opacity-90">年度应纳个人所得税</h2>
+                    <div class="text-5xl font-bold mb-2" id="totalTax">¥0</div>
+                    <div class="flex justify-between items-center mt-4 pt-4 border-t border-white/30">
+                        <div>
+                            <div class="text-sm opacity-80">综合所得收入</div>
+                            <div class="text-xl font-bold" id="totalIncome">¥0</div>
+                        </div>
+                        <div>
+                            <div class="text-sm opacity-80">税后净收入</div>
+                            <div class="text-xl font-bold" id="netIncome">¥0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 税率信息 -->
+                <div class="glass-panel rounded-2xl p-6 shadow-xl">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">📊 适用税率</h3>
+                    <div class="flex justify-between items-center p-4 bg-blue-50 rounded-lg mb-3">
+                        <span class="text-gray-700">应纳税所得额</span>
+                        <span class="text-2xl font-bold text-blue-600" id="taxableIncome">¥0</span>
+                    </div>
+                    <div class="flex justify-between items-center p-4 bg-purple-50 rounded-lg mb-3">
+                        <span class="text-gray-700">适用税率</span>
+                        <span class="text-2xl font-bold text-purple-600" id="taxRate">0%</span>
+                    </div>
+                    <div class="flex justify-between items-center p-4 bg-green-50 rounded-lg">
+                        <span class="text-gray-700">速算扣除数</span>
+                        <span class="text-2xl font-bold text-green-600" id="quickDeduction">¥0</span>
+                    </div>
+                </div>
+
+                <!-- 收入明细 -->
+                <div class="glass-panel rounded-2xl p-6 shadow-xl">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">💵 收入构成明细</h3>
+                    <div class="space-y-3" id="incomeDetail">
+                        <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                            <span class="text-gray-700">工资薪金（年收入）</span>
+                            <span class="font-bold text-gray-800" id="detailSalary">¥0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                            <span class="text-gray-700">劳务报酬（减除20%费用后）</span>
+                            <span class="font-bold text-green-600" id="detailLabor">¥0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                            <span class="text-gray-700">稿酬所得（减除20%再打7折）</span>
+                            <span class="font-bold text-purple-600" id="detailRoyalty">¥0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
+                            <span class="text-gray-700">特许权使用费（减除20%费用后）</span>
+                            <span class="font-bold text-orange-600" id="detailFranchise">¥0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 扣除明细 -->
+                <div class="glass-panel rounded-2xl p-6 shadow-xl">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">🧾 扣除项目汇总（年）</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between p-2 border-b border-gray-100">
+                            <span class="text-gray-600">基本减除费用（6万元/年）</span>
+                            <span class="font-medium" id="deductionBasic">¥60,000</span>
+                        </div>
+                        <div class="flex justify-between p-2 border-b border-gray-100">
+                            <span class="text-gray-600">三险一金</span>
+                            <span class="font-medium" id="deductionInsurance">¥0</span>
+                        </div>
+                        <div class="flex justify-between p-2 border-b border-gray-100">
+                            <span class="text-gray-600">专项附加扣除</span>
+                            <span class="font-medium" id="deductionSpecial">¥0</span>
+                        </div>
+                        <div class="flex justify-between p-2 border-b border-gray-100">
+                            <span class="text-gray-600">其他扣除</span>
+                            <span class="font-medium" id="deductionOther">¥0</span>
+                        </div>
+                        <div class="flex justify-between p-2 bg-gray-100 rounded mt-2">
+                            <span class="font-bold text-gray-800">扣除合计</span>
+                            <span class="font-bold text-gray-800" id="deductionTotal">¥60,000</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 年终奖计算（如填写） -->
+                <div class="glass-panel rounded-2xl p-6 shadow-xl" id="bonusSection" style="display:none;">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">🎁 年终奖个税（单独计税）</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-3 bg-blue-50 rounded-lg">
+                            <div class="text-sm text-gray-600">年终奖金额</div>
+                            <div class="text-lg font-bold text-blue-600" id="bonusAmount">¥0</div>
+                        </div>
+                        <div class="p-3 bg-red-50 rounded-lg">
+                            <div class="text-sm text-gray-600">年终奖个税</div>
+                            <div class="text-lg font-bold text-red-600" id="bonusTax">¥0</div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">* 年终奖可选择单独计税或并入综合所得</p>
+                </div>
+
+                <!-- 个税税率表 -->
+                <div class="glass-panel rounded-2xl p-6 shadow-xl">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">📋 个人所得税税率表（综合所得）</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-2 py-2 text-left">级数</th>
+                                    <th class="px-2 py-2 text-left">全年应纳税所得额</th>
+                                    <th class="px-2 py-2 text-center">税率</th>
+                                    <th class="px-2 py-2 text-right">速算扣除数</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200" id="taxTable">
+                                <tr data-level="1"><td class="px-2 py-2">1</td><td class="px-2 py-2">不超过36,000元</td><td class="px-2 py-2 text-center font-bold">3%</td><td class="px-2 py-2 text-right">0</td></tr>
+                                <tr data-level="2"><td class="px-2 py-2">2</td><td class="px-2 py-2">超过36,000至144,000元</td><td class="px-2 py-2 text-center font-bold">10%</td><td class="px-2 py-2 text-right">2,520</td></tr>
+                                <tr data-level="3"><td class="px-2 py-2">3</td><td class="px-2 py-2">超过144,000至300,000元</td><td class="px-2 py-2 text-center font-bold">20%</td><td class="px-2 py-2 text-right">16,920</td></tr>
+                                <tr data-level="4"><td class="px-2 py-2">4</td><td class="px-2 py-2">超过300,000至420,000元</td><td class="px-2 py-2 text-center font-bold">25%</td><td class="px-2 py-2 text-right">31,920</td></tr>
+                                <tr data-level="5"><td class="px-2 py-2">5</td><td class="px-2 py-2">超过420,000至660,000元</td><td class="px-2 py-2 text-center font-bold">30%</td><td class="px-2 py-2 text-right">52,920</td></tr>
+                                <tr data-level="6"><td class="px-2 py-2">6</td><td class="px-2 py-2">超过660,000至960,000元</td><td class="px-2 py-2 text-center font-bold">35%</td><td class="px-2 py-2 text-right">85,920</td></tr>
+                                <tr data-level="7"><td class="px-2 py-2">7</td><td class="px-2 py-2">超过960,000元</td><td class="px-2 py-2 text-center font-bold">45%</td><td class="px-2 py-2 text-right">181,920</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 个税税率表
+        const taxBrackets = [
+            { limit: 36000, rate: 0.03, deduction: 0 },
+            { limit: 144000, rate: 0.10, deduction: 2520 },
+            { limit: 300000, rate: 0.20, deduction: 16920 },
+            { limit: 420000, rate: 0.25, deduction: 31920 },
+            { limit: 660000, rate: 0.30, deduction: 52920 },
+            { limit: 960000, rate: 0.35, deduction: 85920 },
+            { limit: Infinity, rate: 0.45, deduction: 181920 }
+        ];
+
+        function formatMoney(num) {
+            return '¥' + num.toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+
+        function calculate() {
+            // 获取输入值（月收入，需要乘以12）
+            const salary = (parseFloat(document.getElementById('salary').value) || 0) * 12;
+            const bonus = parseFloat(document.getElementById('bonus').value) || 0;
+            const labor = parseFloat(document.getElementById('labor').value) || 0;
+            const royalty = parseFloat(document.getElementById('royalty').value) || 0;
+            const franchise = parseFloat(document.getElementById('franchise').value) || 0;
+
+            // 三险一金（月）
+            const pension = (parseFloat(document.getElementById('pension').value) || 0) * 12;
+            const medical = (parseFloat(document.getElementById('medical').value) || 0) * 12;
+            const unemployment = (parseFloat(document.getElementById('unemployment').value) || 0) * 12;
+            const housing = (parseFloat(document.getElementById('housing').value) || 0) * 12;
+            const totalInsurance = pension + medical + unemployment + housing;
+
+            // 专项附加扣除（月）
+            const childEdu = (parseFloat(document.getElementById('childEdu').value) || 0) * 12;
+            const continuingEdu = (parseFloat(document.getElementById('continuingEdu').value) || 0) * 12;
+            const housingLoan = (parseFloat(document.getElementById('housingLoan').value) || 0) * 12;
+            const housingRent = (parseFloat(document.getElementById('housingRent').value) || 0) * 12;
+            const elderly = (parseFloat(document.getElementById('elderly').value) || 0) * 12;
+            const infant = (parseFloat(document.getElementById('infant').value) || 0) * 12;
+            const totalSpecial = childEdu + continuingEdu + housingLoan + housingRent + elderly + infant;
+
+            // 其他扣除（月）
+            const otherDeduction = (parseFloat(document.getElementById('otherDeduction').value) || 0) * 12;
+
+            // 计算各项收入（劳务报酬、稿酬、特许权使用费的特殊计算）
+            // 劳务报酬：收入减除20%费用后的余额为收入额
+            const laborIncome = labor > 0 ? labor * 0.8 : 0;
+            
+            // 稿酬所得：收入减除20%费用后，再减按70%计算
+            const royaltyIncome = royalty > 0 ? royalty * 0.8 * 0.7 : 0;
+            
+            // 特许权使用费：收入减除20%费用后的余额为收入额
+            const franchiseIncome = franchise > 0 ? franchise * 0.8 : 0;
+
+            // 综合所得收入额
+            const totalIncome = salary + laborIncome + royaltyIncome + franchiseIncome;
+
+            // 扣除项
+            const basicDeduction = 60000; // 基本减除费用6万元/年
+            const totalDeduction = basicDeduction + totalInsurance + totalSpecial + otherDeduction;
+
+            // 应纳税所得额
+            let taxableIncome = Math.max(0, totalIncome - totalDeduction);
+
+            // 计算个税
+            let tax = 0;
+            let applicableRate = 0;
+            let quickDeduction = 0;
+
+            for (let bracket of taxBrackets) {
+                if (taxableIncome <= bracket.limit) {
+                    applicableRate = bracket.rate;
+                    quickDeduction = bracket.deduction;
+                    tax = taxableIncome * applicableRate - quickDeduction;
+                    break;
+                }
+            }
+
+            // 年终奖个税（单独计税）
+            let bonusTax = 0;
+            if (bonus > 0) {
+                const monthlyBonus = bonus / 12;
+                for (let bracket of taxBrackets) {
+                    if (monthlyBonus <= bracket.limit) {
+                        bonusTax = bonus * bracket.rate - bracket.deduction;
+                        break;
+                    }
+                }
+                document.getElementById('bonusSection').style.display = 'block';
+                document.getElementById('bonusAmount').textContent = formatMoney(bonus);
+                document.getElementById('bonusTax').textContent = formatMoney(bonusTax);
+            } else {
+                document.getElementById('bonusSection').style.display = 'none';
+            }
+
+            // 总税额
+            const totalTax = tax + bonusTax;
+            const netIncome = totalIncome + bonus - totalTax;
+
+            // 更新显示
+            document.getElementById('totalTax').textContent = formatMoney(totalTax);
+            document.getElementById('totalIncome').textContent = formatMoney(totalIncome + bonus);
+            document.getElementById('netIncome').textContent = formatMoney(netIncome);
+            
+            document.getElementById('taxableIncome').textContent = formatMoney(taxableIncome);
+            document.getElementById('taxRate').textContent = (applicableRate * 100).toFixed(0) + '%';
+            document.getElementById('quickDeduction').textContent = formatMoney(quickDeduction);
+
+            // 收入明细
+            document.getElementById('detailSalary').textContent = formatMoney(salary);
+            document.getElementById('detailLabor').textContent = formatMoney(laborIncome) + (labor > 0 ? ' (原' + formatMoney(labor) + ')' : '');
+            document.getElementById('detailRoyalty').textContent = formatMoney(royaltyIncome) + (royalty > 0 ? ' (原' + formatMoney(royalty) + ')' : '');
+            document.getElementById('detailFranchise').textContent = formatMoney(franchiseIncome) + (franchise > 0 ? ' (原' + formatMoney(franchise) + ')' : '');
+
+            // 扣除明细
+            document.getElementById('deductionInsurance').textContent = formatMoney(totalInsurance);
+            document.getElementById('deductionSpecial').textContent = formatMoney(totalSpecial);
+            document.getElementById('deductionOther').textContent = formatMoney(otherDeduction);
+            document.getElementById('deductionTotal').textContent = formatMoney(totalDeduction);
+
+            // 高亮当前税率级数
+            document.querySelectorAll('#taxTable tr').forEach(tr => tr.classList.remove('bg-yellow-100'));
+            for (let i = 0; i < taxBrackets.length; i++) {
+                if (taxableIncome <= taxBrackets[i].limit) {
+                    document.querySelector(`tr[data-level="${i+1}"]`)?.classList.add('bg-yellow-100');
+                    break;
+                }
+            }
+        }
+
+        function resetForm() {
+            const inputs = document.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => input.value = '');
+            calculate();
+        }
+
+        // 初始化
+        calculate();
+    </script>
+</body>
+</html>
