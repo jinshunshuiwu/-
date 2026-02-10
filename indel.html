@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>金顺税务业绩目标拆解计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .calculator-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(106, 17, 203, 0.25);
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            border: 1px solid rgba(106, 17, 203, 0.1);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(106, 17, 203, 0.1);
+        }
+        
+        .header h1 {
+            color: #6a11cb;
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 15px;
+        }
+        
+        .input-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .section-box {
+            background: #f8f4ff;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(106, 17, 203, 0.15);
+        }
+        
+        .section-title {
+            color: #6a11cb;
+            margin-bottom: 18px;
+            font-size: 17px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title::before {
+            content: "";
+            width: 4px;
+            height: 16px;
+            background: #6a11cb;
+            border-radius: 2px;
+            margin-right: 10px;
+        }
+        
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .day-item {
+            background: white;
+            padding: 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(106, 17, 203, 0.2);
+            transition: all 0.2s ease;
+        }
+        
+        .day-item:hover {
+            border-color: #6a11cb;
+            box-shadow: 0 4px 12px rgba(106, 17, 203, 0.1);
+        }
+        
+        .day-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .input-group {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        
+        .input-group input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #6a11cb;
+            box-shadow: 0 0 0 3px rgba(106, 17, 203, 0.1);
+        }
+        
+        .unit {
+            position: absolute;
+            right: 10px;
+            color: #888;
+            font-size: 14px;
+        }
+        
+        .total-target {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(106, 17, 203, 0.1);
+        }
+        
+        .total-target-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #6a11cb;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            color: #6a11cb;
+            background: rgba(106, 17, 203, 0.05);
+        }
+        
+        .total-target-input::placeholder {
+            color: #aaa;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+        
+        .btn {
+            padding: 14px 35px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-calculate {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(106, 17, 203, 0.3);
+        }
+        
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(106, 17, 203, 0.4);
+        }
+        
+        .btn-reset {
+            background: white;
+            color: #6a11cb;
+            border: 2px solid #6a11cb;
+        }
+        
+        .btn-reset:hover {
+            background: rgba(106, 17, 203, 0.05);
+        }
+        
+        .results {
+            display: none;
+            background: #f8f4ff;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid rgba(106, 17, 203, 0.15);
+        }
+        
+        .results.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .results-title {
+            color: #6a11cb;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        
+        .results-title::before {
+            content: "📊";
+            margin-right: 10px;
+        }
+        
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 25px;
+        }
+        
+        .result-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(106, 17, 203, 0.2);
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(106, 17, 203, 0.15);
+        }
+        
+        .result-day {
+            font-size: 15px;
+            color: #555;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        .daily-target {
+            font-size: 24px;
+            font-weight: 700;
+            color: #6a11cb;
+            margin: 12px 0;
+            text-shadow: 0 2px 4px rgba(106, 17, 203, 0.1);
+        }
+        
+        .daily-target-label {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .day-total {
+            font-size: 15px;
+            font-weight: 600;
+            color: #666;
+            margin-top: 10px;
+            padding: 6px 0;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .day-total-label {
+            font-size: 14px;
+            color: #888;
+        }
+        
+        .day-ratio {
+            font-size: 13px;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .summary {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(106, 17, 203, 0.2);
+        }
+        
+        .summary h3 {
+            color: #6a11cb;
+            margin-bottom: 15px;
+            font-size: 17px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .summary h3::before {
+            content: "📈";
+            margin-right: 10px;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        
+        .summary-label {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .summary-value {
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .summary-value.highlight {
+            color: #6a11cb;
+            font-weight: 700;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .calculator-container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .input-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .days-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .daily-target {
+                font-size: 22px;
+            }
+        }
+        
+        /* 进度指示器 */
+        .progress-indicator {
+            height: 4px;
+            background: #f0f0f0;
+            border-radius: 2px;
+            margin: 10px 0 5px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6a11cb, #2575fc);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            font-size: 12px;
+            color: #888;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <div class="header">
+            <h1>📊 金顺税务业绩目标拆解计算器</h1>
+            <p>按日拆解月度业绩目标</p>
+        </div>
+        
+        <div class="input-section">
+            <div class="section-box">
+                <div class="section-title">本月各天工作天数</div>
+                <div class="days-grid" id="daysCountGrid"></div>
+            </div>
+            
+            <div class="section-box">
+                <div class="section-title">各天业绩占比（总和100%）</div>
+                <div class="days-grid" id="daysPercentageGrid"></div>
+                
+                <div class="total-target">
+                    <div class="section-title">本月总业绩目标</div>
+                    <input type="number" id="totalTarget" class="total-target-input" 
+                           placeholder="输入总业绩目标（元）" min="0" step="100">
+                </div>
+            </div>
+        </div>
+        
+        <div class="buttons">
+            <button class="btn btn-calculate" onclick="calculate()">
+                <span>🎯</span> 计算目标
+            </button>
+            <button class="btn btn-reset" onclick="reset()">
+                <span>🔄</span> 重置数据
+            </button>
+        </div>
+        
+        <div class="results" id="resultsSection">
+            <div class="results-title">拆解结果</div>
+            <div class="results-grid" id="resultsGrid"></div>
+            
+            <div class="summary" id="summarySection"></div>
+        </div>
+    </div>
+
+    <script>
+        // 星期数据
+        const daysData = [
+            { id: 'mon', name: '星期一' },
+            { id: 'tue', name: '星期二' },
+            { id: 'wed', name: '星期三' },
+            { id: 'thu', name: '星期四' },
+            { id: 'fri', name: '星期五' },
+            { id: 'sat', name: '星期六' },
+            { id: 'sun', name: '星期天' }
+        ];
+
+        // 初始化
+        function init() {
+            initDaysGrid('daysCountGrid', 'days', '天', [4,4,4,4,4,4,2]);
+            initDaysGrid('daysPercentageGrid', 'percent', '%', [20,18,19,18,19,4,2]);
+            document.getElementById('totalTarget').value = '100000';
+        }
+
+        // 初始化网格
+        function initDaysGrid(gridId, type, unit, defaults) {
+            const grid = document.getElementById(gridId);
+            grid.innerHTML = '';
+            daysData.forEach((day, index) => {
+                const item = document.createElement('div');
+                item.className = 'day-item';
+                item.innerHTML = `
+                    <div class="day-name">${day.name}</div>
+                    <div class="input-group">
+                        <input type="number" id="${day.id}-${type}" 
+                               min="0" ${type==='percent' ? 'max="100" step="0.1"' : 'max="31" step="1"'} 
+                               value="${defaults[index]}">
+                        <span class="unit">${unit}</span>
+                    </div>
+                    <div class="progress-indicator">
+                        <div class="progress-fill" id="${day.id}-${type}-progress"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span>设置值</span>
+                        <span id="${day.id}-${type}-value">${defaults[index]}${unit}</span>
+                    </div>
+                `;
+                grid.appendChild(item);
+                
+                // 添加进度条更新
+                const input = document.getElementById(`${day.id}-${type}`);
+                const progress = document.getElementById(`${day.id}-${type}-progress`);
+                const valueSpan = document.getElementById(`${day.id}-${type}-value`);
+                
+                input.addEventListener('input', () => {
+                    const value = parseFloat(input.value) || 0;
+                    const max = type === 'percent' ? 100 : 31;
+                    const progressWidth = (value / max) * 100;
+                    progress.style.width = `${Math.min(progressWidth, 100)}%`;
+                    valueSpan.textContent = `${value}${unit}`;
+                    
+                    // 根据值改变进度条颜色
+                    if (value > max * 0.8) {
+                        progress.style.background = 'linear-gradient(90deg, #ff416c, #ff4b2b)';
+                    } else if (value > max * 0.5) {
+                        progress.style.background = 'linear-gradient(90deg, #6a11cb, #2575fc)';
+                    } else {
+                        progress.style.background = 'linear-gradient(90deg, #6a11cb, #2575fc)';
+                    }
+                });
+                
+                // 初始化进度条
+                const initialValue = defaults[index];
+                const initialMax = type === 'percent' ? 100 : 31;
+                const initialProgress = (initialValue / initialMax) * 100;
+                progress.style.width = `${Math.min(initialProgress, 100)}%`;
+            });
+        }
+
+        // 计算
+        function calculate() {
+            const totalTarget = parseFloat(document.getElementById('totalTarget').value);
+            
+            if (!totalTarget || totalTarget <= 0) {
+                alert('请输入有效的总业绩目标');
+                return;
+            }
+            
+            const results = [];
+            let totalPercent = 0;
+            
+            // 收集数据
+            daysData.forEach(day => {
+                const days = parseFloat(document.getElementById(`${day.id}-days`).value) || 0;
+                const percent = parseFloat(document.getElementById(`${day.id}-percent`).value) || 0;
+                totalPercent += percent;
+                
+                const total = (totalTarget * percent) / 100;
+                const daily = days > 0 ? total / days : 0;
+                
+                results.push({
+                    ...day,
+                    days,
+                    percent,
+                    total,
+                    daily
+                });
+            });
+            
+            // 验证百分比
+            if (Math.abs(totalPercent - 100) > 0.1) {
+                alert(`各天业绩占比之和为${totalPercent.toFixed(1)}%，必须等于100%`);
+                return;
+            }
+            
+            // 显示结果
+            showResults(results, totalTarget);
+        }
+
+        // 显示结果 - 在金额前加上"目标"字样
+        function showResults(results, totalTarget) {
+            const grid = document.getElementById('resultsGrid');
+            const summary = document.getElementById('summarySection');
+            
+            grid.innerHTML = '';
+            summary.innerHTML = '';
+            
+            // 生成每日结果 - 在金额前加上"目标"字样
+            results.forEach(result => {
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                
+                card.innerHTML = `
+                    <div class="result-day">${result.name}</div>
+                    
+                    <!-- 日均目标 -->
+                    <div class="daily-target-label">日均目标</div>
+                    <div class="daily-target">¥${formatNumber(result.daily.toFixed(2))}</div>
+                    
+                    <!-- 总目标 -->
+                    <div class="day-total">
+                        <div class="day-total-label">总目标</div>
+                        ¥${formatNumber(result.total.toFixed(2))}
+                    </div>
+                    
+                    <div class="day-ratio">占比：${result.percent.toFixed(1)}%</div>
+                `;
+                grid.appendChild(card);
+            });
+            
+            // 汇总信息
+            const totalDays = results.reduce((sum, r) => sum + r.days, 0);
+            const totalCalculated = results.reduce((sum, r) => sum + r.total, 0);
+            const averageDaily = totalDays > 0 ? totalTarget / totalDays : 0;
+            
+            summary.innerHTML = `
+                <h3>汇总信息</h3>
+                <div class="summary-item">
+                    <span class="summary-label">🎯 本月总目标</span>
+                    <span class="summary-value highlight">¥${formatNumber(totalTarget.toFixed(2))}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">📊 计算验证总计</span>
+                    <span class="summary-value" style="color: ${Math.abs(totalCalculated - totalTarget) < 1 ? '#4CAF50' : '#f44336'}">
+                        ¥${formatNumber(totalCalculated.toFixed(2))}
+                    </span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">⏱️ 本月总工作日</span>
+                    <span class="summary-value">${totalDays}天</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">📈 整体日均目标</span>
+                    <span class="summary-value">¥${formatNumber(averageDaily.toFixed(2))}</span>
+                </div>
+            `;
+            
+            // 显示结果区域
+            document.getElementById('resultsSection').classList.add('active');
+            
+            // 滚动到结果区域
+            document.getElementById('resultsSection').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+
+        // 重置
+        function reset() {
+            document.querySelectorAll('input').forEach(input => {
+                if (input.id.includes('days')) {
+                    input.value = '4';
+                } else if (input.id.includes('percent')) {
+                    const defaults = [20,18,19,18,19,4,2];
+                    const index = ['mon','tue','wed','thu','fri','sat','sun'].indexOf(input.id.split('-')[0]);
+                    input.value = defaults[index];
+                } else if (input.id === 'totalTarget') {
+                    input.value = '100000';
+                }
+                
+                // 触发进度条更新
+                input.dispatchEvent(new Event('input'));
+            });
+            
+            document.getElementById('resultsSection').classList.remove('active');
+        }
+
+        // 数字格式化
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // 页面加载
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
